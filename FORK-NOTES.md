@@ -3,6 +3,10 @@
 This repository is a fork of [MoonshotAI/kimi-code](https://github.com/MoonshotAI/kimi-code)
 (MIT License, Copyright (c) 2026 Moonshot AI — see `LICENSE`, unchanged).
 
+**Purpose:** this fork is maintained for use with the
+[lmctl-ai/lmctl](https://github.com/lmctl-ai/lmctl) tool, where kimi-code runs as a provider
+backend under lmctl.
+
 It carries one additional patch on top of upstream:
 
 - **fix(agent-core-v2): rebind stale agent runtime to local on first use after restore** —
