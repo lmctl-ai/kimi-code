@@ -43,3 +43,7 @@ handover.md
 *-mockup.html
 *-demo.html
 *-demos.html
+
+# lmctl teamfiles carry session wiring/credentials -- never tracked (fleet hygiene sweep, operator 2026-09-21)
+*.lmctl
+*.lmctl.*
