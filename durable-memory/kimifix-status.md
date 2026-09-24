@@ -237,3 +237,13 @@ SUPERSEDES the "installed fleet binary v0.41.0" facts above.
   CHANGES-REQUESTED (two accuracy fixes: cross-host wedge is NOT fixed by restarting the same
   non-ACP host; `local` runtime exists only in TUI/kap-server/headless hosts) — both applied and
   amended before push. Local internal durable-memory committed on local main only.
+
+## 2026-09-24 (3) — upstream watch: external repro, still no maintainer
+- PR #3563: open, no human feedback (only changeset-bot + codex-connector bots from 2026-09-05).
+- Issue #3562: first-ever comment today from EXTERNAL user MaxjoyMa (not a maintainer) — reproduces
+  on stock CLI 2.1.0 macOS, mid-session variant (turns 49-52 die at first tool call; restarts did
+  NOT recover); "looking forward to #3563 landing". Note: that mid-session ACP-host reap variant is
+  likely NOT covered by our heal (no `local` in ACP hosts) nor by 2.1.0's resume re-bind.
+- Operator decision 2026-09-24: NO action — no maintainer feedback, stand-down (2026-09-07) holds.
+  No comments, no PR rebase, no scope extension. Re-engage trigger unchanged: a maintainer directly
+  comments on #3563.
