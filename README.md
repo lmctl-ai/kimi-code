@@ -5,6 +5,12 @@
 
 ![Demo of using Kimi Code](./docs/media/intro.gif)
 
+> **Fork notice (lmctl-ai/kimi-code):** this is a fork of [MoonshotAI/kimi-code](https://github.com/MoonshotAI/kimi-code) maintained for use with the [lmctl-ai/lmctl](https://github.com/lmctl-ai/lmctl) tool, where kimi-code runs as a provider backend under lmctl. MIT License, Copyright (c) 2026 Moonshot AI — see `LICENSE`, unchanged.
+>
+> **Main issue this fork patches — "acp-runtime-after-reap":** when a session's persisted agent runtime binding (e.g. `acp:<sessionId>` from a previous `kimi acp` lifetime) is restored by a process that never registers that runtime (TUI, kap-server, headless `-p`), the agent keeps conversing but every tool call and subagent spawn fails with `runtime <id> does not exist in workspace <id>` — restarting the same non-ACP host just replays the stale binding, so the wedge persists until the binding is repaired or an ACP host re-registers and rebinds the runtime. The patch (`packages/agent-core-v2/src/agent/runtimeBinding/agentRuntime.ts` + its tests) heals the stale binding on first use after restore by rebinding to the `local` runtime that TUI/kap-server/headless hosts provide, and is also offered upstream as a pull request. See `FORK-NOTES.md`.
+>
+> **Operational note:** kimi-code auto-update silently replaces a patched binary with the stock one, which reintroduces the bug. If you run a patched build, disable automatic installs (`[upgrade] auto_install = false` in `~/.kimi-code/tui.toml`).
+
 ## What is Kimi Code CLI
 
 Kimi Code CLI is an AI coding agent that runs in your terminal — it can read and edit code, run shell commands, search files, fetch web pages, and choose the next step based on the feedback it receives. It works out of the box with Moonshot AI’s Kimi models and can also be configured to use other compatible providers.
