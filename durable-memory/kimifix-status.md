@@ -247,3 +247,10 @@ SUPERSEDES the "installed fleet binary v0.41.0" facts above.
 - Operator decision 2026-09-24: NO action — no maintainer feedback, stand-down (2026-09-07) holds.
   No comments, no PR rebase, no scope extension. Re-engage trigger unchanged: a maintainer directly
   comments on #3563.
+
+## 2026-09-25 — teamfile leak-proofing (math request)
+- Added `*.lmctl` + `*.lmctl.*` to `.git/info/exclude` (local-only, no upstream-facing .gitignore
+  diff; the `*.lmctl.*` pattern catches derived backups like kimifix.lmctl.bak.1788642003).
+  Verified: `git status --short` empty on the fork branch, `git check-ignore -v` matches both files.
+  Applies repo-wide regardless of checked-out branch. (Internal main also carries the .gitignore
+  variant from the earlier fleet hygiene sweep, b40a66399/eec... — harmless overlap.)
