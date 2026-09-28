@@ -290,3 +290,8 @@ accepts external PRs for approved bug fixes only — feature PRs need maintainer
 PR body acknowledges this (reference implementation, fire-and-forget like #3563). README fork notice
 now links PR #3563 (acp-runtime fix) and PR #4052 (batch delivery); docs commit 8170e0d69, fork
 main = 8170e0d69. Re-engage trigger unchanged: only a maintainer directly commenting on our PRs.
+
+Operator doctrine (2026-09-27): the fork IS the deliverable. Upstream PRs (#3563, #4052, any future
+ones) are filed as courtesy/reference for US, not for them — we move on regardless of acceptance.
+Upstream's feature-PR policy, closures without review, or silence need no response and no triage.
+Re-engage ONLY on a maintainer directly commenting on one of our PRs/issues.
