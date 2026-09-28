@@ -275,3 +275,10 @@ when a turn ends with n prompts queued, deliver ALL of them to the model at once
   paragraph). Pushed to lmctl-ai/kimi-code main (= 6dd98df61, public, default branch main).
 - NOTE: first native rebuild raced the durable-memory branch dance (Lead checked out main mid-build);
   binary discarded, clean rebuild on the correct branch required before install.
+
+Install follow-up (2026-09-27): clean rebuild on kimifix/fork-main-2.1.1 @ 6dd98df61 (first build
+raced the branch dance — discarded). Fleet binary ~/.kimi-code/bin/kimi = 2.1.1-kimifix+batch, sha256
+496cc96663d5b1d541e4c8ca35a6e25287dde3348ed87fdcf150f9a58b057e33 (staged as kimi.2.1.1-kimifix.2).
+Enhancement markers verified in SEA blob. Rollback: ~/.kimi-code/kimi-rollback-2.1.1-kimifix.sh
+(restores 3d00d5e2...). Smoke: --version + headless KIMIFIX_BATCH_OK pass. Report:
+/tmp/kimifix-batch-drain-to-math-lead.md. Team back to standby-as-service.
