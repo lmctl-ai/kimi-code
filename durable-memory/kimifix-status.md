@@ -282,3 +282,11 @@ raced the branch dance — discarded). Fleet binary ~/.kimi-code/bin/kimi = 2.1.
 Enhancement markers verified in SEA blob. Rollback: ~/.kimi-code/kimi-rollback-2.1.1-kimifix.sh
 (restores 3d00d5e2...). Smoke: --version + headless KIMIFIX_BATCH_OK pass. Report:
 /tmp/kimifix-batch-drain-to-math-lead.md. Team back to standby-as-service.
+
+Upstream PR for the batch-drain enhancement (2026-09-27, operator tasking): branch
+kimifix/batch-queued-prompts-upstream = origin/main (be7d5f5fe, no drift) + cherry-pick 7aaef76ef,
+pushed to mike-lmctl fork; issue #4051 + PR #4052 filed on MoonshotAI/kimi-code. NOTE: upstream
+accepts external PRs for approved bug fixes only — feature PRs need maintainer /approve on the issue;
+PR body acknowledges this (reference implementation, fire-and-forget like #3563). README fork notice
+now links PR #3563 (acp-runtime fix) and PR #4052 (batch delivery); docs commit 8170e0d69, fork
+main = 8170e0d69. Re-engage trigger unchanged: only a maintainer directly commenting on our PRs.
