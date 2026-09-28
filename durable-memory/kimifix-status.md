@@ -254,3 +254,24 @@ SUPERSEDES the "installed fleet binary v0.41.0" facts above.
   Verified: `git status --short` empty on the fork branch, `git check-ignore -v` matches both files.
   Applies repo-wide regardless of checked-out branch. (Internal main also carries the .gitignore
   variant from the earlier fleet hygiene sweep, b40a66399/eec... — harmless overlap.)
+
+## 2026-09-27 — Enhancement: batched delivery of queued prompts (operator tasking)
+
+Operator request: harness used to deliver queued prompts strictly one turn each (FIFO); enhancement =
+when a turn ends with n prompts queued, deliver ALL of them to the model at once in the next turn.
+
+- Design by Lead: machine-level batch drain (gate whole queue snapshot sequentially, per-item
+  block/fail/rewrite, arrivals during gating re-gated), engine passes `entries`, loopService binds
+  secondary waiters to the shared turn (batched map, mirrors `steered` precedent).
+- Author: Coder (codex). Cross-review: Reviewer3 (agy) — REQUEST-CHANGES, 5 findings. Fixed: (1) waiter
+  leak when batch head cancelled pre-bind (live-entry promotion to primary, both bind sites), (3) gating
+  onError infinite ready<->gating loop (now emits prompt.gate_failed per item + clears queue), (4)
+  drainBatch=[] poisoning (undefined instead). Pre-existing, not fixed: (2) notifications-vs-prompt
+  ordering inversion context vs store history (base had it), (5) re-submit race history duplication
+  (base had it for 1 entry; now n; needs journal dedup, out of scope).
+- Verify: focused 142 tests pass (Lead re-ran), full agent-core-v2 suite 6,878 pass / 2 skipped,
+  typecheck + root lint + comment guard (1,740 files) + diff-check clean.
+- Commits on kimifix/fork-main-2.1.1: 76ad98034 (feat + changeset), 6dd98df61 (README fork-notice
+  paragraph). Pushed to lmctl-ai/kimi-code main (= 6dd98df61, public, default branch main).
+- NOTE: first native rebuild raced the durable-memory branch dance (Lead checked out main mid-build);
+  binary discarded, clean rebuild on the correct branch required before install.
