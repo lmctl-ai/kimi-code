@@ -9,6 +9,8 @@
 >
 > **Main issue this fork patches — "acp-runtime-after-reap":** when a session's persisted agent runtime binding (e.g. `acp:<sessionId>` from a previous `kimi acp` lifetime) is restored by a process that never registers that runtime (TUI, kap-server, headless `-p`), the agent keeps conversing but every tool call and subagent spawn fails with `runtime <id> does not exist in workspace <id>` — restarting the same non-ACP host just replays the stale binding, so the wedge persists until the binding is repaired or an ACP host re-registers and rebinds the runtime. The patch (`packages/agent-core-v2/src/agent/runtimeBinding/agentRuntime.ts` + its tests) heals the stale binding on first use after restore by rebinding to the `local` runtime that TUI/kap-server/headless hosts provide, and is also offered upstream as a pull request. See `FORK-NOTES.md`.
 >
+> **Enhancement over upstream — batched delivery of queued prompts:** upstream delivers prompts you send while the agent is working strictly one at a time — each queued prompt gets its own turn after the current one finishes. This fork instead delivers every prompt that is queued when a turn ends together in the next turn: the model sees all queued messages at once (FIFO order, each still a separate user message) and answers them in a single turn. Prompts sent while the agent is idle behave exactly as upstream.
+>
 > **Operational note:** kimi-code auto-update silently replaces a patched binary with the stock one, which reintroduces the bug. If you run a patched build, disable automatic installs (`[upgrade] auto_install = false` in `~/.kimi-code/tui.toml`).
 
 ## What is Kimi Code CLI
