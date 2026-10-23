@@ -1,6 +1,5 @@
 import { mkdtempSync, mkdirSync, rmSync } from 'node:fs';
 import { createRequire } from 'node:module';
-import { once } from 'node:events';
 import { dirname, join } from 'node:path';
 import { Worker } from 'node:worker_threads';
 
@@ -90,10 +89,19 @@ async function smokeSearchWorker(): Promise<void> {
     workerData: { dir, bootSalt: 'sea-smoke' },
   });
   try {
-    const ready = once(worker, 'message', {
-      signal: AbortSignal.timeout(15_000),
-    }) as Promise<unknown[]>;
-    const [event] = await ready;
+    const event = await new Promise<unknown>((resolveEvent, rejectEvent) => {
+      const timer = setTimeout(() => {
+        rejectEvent(new Error('search worker handshake timed out'));
+      }, 15_000);
+      worker.once('message', (message: unknown) => {
+        clearTimeout(timer);
+        resolveEvent(message);
+      });
+      worker.once('error', (error: Error) => {
+        clearTimeout(timer);
+        rejectEvent(error);
+      });
+    });
     const v = (event as { type?: string; v?: number }).v;
     if ((event as { type?: string }).type !== 'ready' || typeof v !== 'number') {
       throw new Error(`search worker handshake is unexpected: ${JSON.stringify(event)}`);

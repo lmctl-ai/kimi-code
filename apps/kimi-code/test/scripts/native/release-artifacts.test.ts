@@ -199,6 +199,9 @@ describe('native release artifacts', () => {
       expect(entry.filename).toBe('kimi-code-win32-x64.exe');
       expect(entry.checksum).toBe(sha256(binaryContent));
       expect(entry.compressed.filename).toBe('kimi-code-win32-x64.zst');
+      expect(existsSync(join(releaseDir, 'kimi-code-windows-x64.exe'))).toBe(true);
+      expect(existsSync(join(releaseDir, 'kimi-windows-x64.exe'))).toBe(true);
+      expect(await readFile(join(releaseDir, 'kimi-code-windows-x64.exe'))).toEqual(binaryContent);
     } finally {
       rmSync(releaseDir, { recursive: true, force: true });
     }

@@ -2,6 +2,17 @@ name: Manual Native Bundle
 
 on:
   workflow_dispatch:
+    inputs:
+      sign-macos:
+        description: 'Sign and notarize macOS builds (requires Apple secrets)'
+        required: false
+        type: boolean
+        default: false
+      sign-windows:
+        description: 'Sign Windows builds with Azure Artifact Signing (requires Azure secrets)'
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -12,8 +23,8 @@ jobs:
     with:
       upload-artifact-prefix: kimi-code-native
       retention-days: 3
-      sign-macos: true
-      sign-windows: true
+      sign-macos: ${{ inputs.sign-macos }}
+      sign-windows: ${{ inputs.sign-windows }}
     secrets:
       APPLE_CERTIFICATE_P12: ${{ secrets.APPLE_CERTIFICATE_P12 }}
       APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
