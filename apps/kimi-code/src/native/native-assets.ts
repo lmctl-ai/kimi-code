@@ -256,13 +256,32 @@ function sanitizeSegment(value: string): string {
   return sanitized.length > 0 ? sanitized : 'unknown';
 }
 
+function getBunAssetSource(): NativeAssetSource | null {
+  const assets = (
+    globalThis as { __KIMI_BUN_ASSETS__?: Readonly<Record<string, string>> }
+  ).__KIMI_BUN_ASSETS__;
+  if (typeof assets !== 'object' || assets === null) return null;
+  return {
+    getAssetKeys: () => Object.keys(assets),
+    getRawAsset: (assetKey) => {
+      const filePath = assets[assetKey];
+      if (filePath === undefined) {
+        throw new Error(`Embedded asset not found: ${assetKey}`);
+      }
+      return readFileSync(filePath);
+    },
+  };
+}
+
 export function getSeaAssetSource(): NativeAssetSource | null {
   const sea = loadSeaModule();
-  if (sea === null || !sea.isSea()) return null;
-  return {
-    getAssetKeys: () => sea.getAssetKeys(),
-    getRawAsset: (assetKey) => sea.getRawAsset(assetKey),
-  };
+  if (sea !== null && sea.isSea()) {
+    return {
+      getAssetKeys: () => sea.getAssetKeys(),
+      getRawAsset: (assetKey) => sea.getRawAsset(assetKey),
+    };
+  }
+  return getBunAssetSource();
 }
 
 export function getEmbeddedNativeAssetManifest(

@@ -13,6 +13,11 @@ on:
         required: false
         type: number
         default: 3
+      version:
+        description: 'Optional release version (x.y.z) embedded into the compiled executable'
+        required: false
+        type: string
+        default: ''
       sign-macos:
         description: 'Whether to sign + notarize macOS builds (requires Apple secrets)'
         required: false
@@ -78,8 +83,18 @@ jobs:
           node-version-file: .nvmrc
           cache: 'pnpm'
 
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.3
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Configure release version
+        if: inputs.version != ''
+        shell: bash
+        run: echo "KIMI_CODE_VERSION=${{ inputs.version }}" >> "$GITHUB_ENV"
 
       - name: Setup macOS keychain (release only)
         if: runner.os == 'macOS' && inputs.sign-macos
@@ -97,15 +112,15 @@ jobs:
           echo "KIMI_CODE_BUILT_IN_CATALOG_FILE=$CATALOG_FILE" >> "$GITHUB_ENV"
 
       - name: Build Kimi web assets
-        # The SEA blob step embeds apps/kimi-code/dist-web. The bundle is
+        # The native bundle step embeds apps/kimi-code/dist-web. The bundle is
         # committed (synced from the code-app repo) — just verify it is in place.
         run: node apps/kimi-code/scripts/check-web-assets.mjs
 
-      - name: Build native executable (release profile, macOS signed)
+      - name: Build Bun executable (release profile, macOS signed)
         if: runner.os == 'macOS' && inputs.sign-macos
-        run: pnpm --filter @moonshot-ai/kimi-code run build:native:release
+        run: pnpm --filter @moonshot-ai/kimi-code run build:native:bun:release
 
-      - name: Build native executable (local profile)
+      - name: Build Bun executable (local profile)
         if: '!(runner.os == ''macOS'' && inputs.sign-macos)'
         env:
           KIMI_AZURE_TRUSTED_SIGNING: ${{ runner.os == 'Windows' && inputs.sign-windows && 'true' || 'false' }}
@@ -115,7 +130,7 @@ jobs:
           AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
           AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-        run: pnpm --filter @moonshot-ai/kimi-code run build:native:sea
+        run: pnpm --filter @moonshot-ai/kimi-code run build:native:bun
 
       - name: Notarize macOS binary
         if: runner.os == 'macOS' && inputs.sign-macos
@@ -130,7 +145,7 @@ jobs:
         if: always() && runner.os == 'macOS' && inputs.sign-macos
         uses: ./.github/actions/macos-keychain-cleanup
 
-      - name: Smoke test native executable
+      - name: Smoke test Bun executable
         run: pnpm --filter @moonshot-ai/kimi-code run test:native:smoke
 
       - name: Package native artifact

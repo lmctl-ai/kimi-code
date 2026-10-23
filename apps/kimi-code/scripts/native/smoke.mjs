@@ -10,7 +10,7 @@ const target = targetTriple();
 const executablePath = nativeBinPath(target);
 const smokeHome = nativeSmokeHome();
 const packageJson = JSON.parse(await readFile(resolve(appRoot, 'package.json'), 'utf-8'));
-const expectedVersion = packageJson.version;
+const expectedVersion = process.env.KIMI_CODE_VERSION ?? packageJson.version;
 
 function fail(message) {
   console.error(message);
