@@ -26,8 +26,14 @@ function loadSeaModule(): NodeSeaModule | null {
   return cachedSea;
 }
 
-/** Runtime SEA detection — true when running as a packaged native binary. */
+function hasBunEmbeddedAssets(): boolean {
+  const assets = (globalThis as { __KIMI_BUN_ASSETS__?: unknown }).__KIMI_BUN_ASSETS__;
+  return typeof assets === 'object' && assets !== null;
+}
+
+/** Runtime SEA / Bun single-file executable detection — true when running as a packaged native binary. */
 export function detectNativeInstall(): boolean {
+  if (hasBunEmbeddedAssets()) return true;
   const sea = loadSeaModule();
   if (sea === null) return false;
   try {
