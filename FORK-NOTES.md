@@ -16,7 +16,7 @@ fails with `runtime <id> does not exist in workspace <id>` — restarting the sa
 just replays the stale binding, so the wedge persists until the binding is repaired or an ACP
 host re-registers and rebinds the runtime.
 
-The fork carries one patch on top of upstream (currently based on upstream **2.1.1**):
+The fork carries one patch on top of upstream (currently based on upstream **2.3.1**):
 
 - **fix(agent-core-v2): rebind stale agent runtime to local on first use after restore** —
   `AgentRuntimeService.inspect()`/`acquire()`/`isAvailable()` catch `runtime.not_found`,
@@ -35,10 +35,40 @@ session resumed by a fresh `kimi acp` process. The two fixes are complementary: 
 covers ACP-host resumes, this patch covers cross-host resumes (an ACP-created session resumed
 in a TUI, kap-server, or headless host, where no ACP runtime exists at all).
 
+## Enhancement over upstream: batched delivery of queued prompts
+
+Upstream delivers prompts you send while the agent is working strictly one at a time — each
+queued prompt gets its own turn after the current one finishes. This fork instead delivers
+every prompt that is queued when a turn ends together in the next turn: the model sees all
+queued messages at once (FIFO order, each still a separate user message) and answers them in
+a single turn. Prompts sent while the agent is idle behave exactly as upstream. Offered
+upstream as [PR #4052](https://github.com/MoonshotAI/kimi-code/pull/4052)
+(issue [#4051](https://github.com/MoonshotAI/kimi-code/issues/4051)).
+
+## Installing this fork
+
+Patched binaries are published as GitHub releases on this fork and install with
+[lmscript](https://github.com/lmctl-ai/lmctl) (asset `kimi-code-linux-x64`, SHA-256 verified
+against the release's `SHA256SUMS`):
+
+```sh
+lmscript install github:lmctl-ai/kimi-code@v2.3.1+kimifix.1
+```
+
+lmscript verifies the checksum, caches the binary under
+`~/.cache/lmscript/tools/github/lmctl-ai/kimi-code/<tag>/`, and prints the cached path; then
+install it over your kimi-code binary (back up the stock one first):
+
+```sh
+cp ~/.kimi-code/bin/kimi ~/.kimi-code/bin/kimi.stock.bak
+cp ~/.cache/lmscript/tools/github/lmctl-ai/kimi-code/v2.3.1+kimifix.1/kimi-code ~/.kimi-code/bin/kimi
+```
+
 ## Operational note: auto-update
 
 kimi-code auto-update silently replaces a patched binary with the stock release, which
-reintroduces the bug fleet-wide (observed 2026-09-20: patched 0.41.0 replaced by stock 2.0.2).
+reintroduces the bug fleet-wide (observed 2026-09-20: patched 0.41.0 replaced by stock 2.0.2,
+and again 2026-10-24: patched 2.1.1 replaced by stock 2.3.1).
 If you run a patched build, disable automatic installs:
 
 ```toml
