@@ -187,6 +187,9 @@ describe('maybeRelaunchWithStagedNativeUpdate', () => {
     await mkdir(join(workDir, 'bin'), { recursive: true });
     await writeFile(exePath, 'old-binary');
     vi.stubEnv('KIMI_CODE_HOME', homeDir);
+    // kimifix fork: auto install is disabled unless KIMIFIX_ENABLE_AUTO_UPDATE
+    // is set, so tests exercising the upstream auto-install machinery opt in here.
+    vi.stubEnv('KIMIFIX_ENABLE_AUTO_UPDATE', '1');
     fsMocks.renameBlocker = null;
     fsMocks.linkError = null;
   });
@@ -780,6 +783,20 @@ describe('maybeRelaunchWithStagedNativeUpdate', () => {
   it('leaves an automatic stage in place when auto_install is disabled in the tui config', async () => {
     await mkdir(homeDir, { recursive: true });
     await writeFile(join(homeDir, 'tui.toml'), '[upgrade]\nauto_install = false\n', 'utf-8');
+    await seedStagedUpdate(exePath, STAGED_VERSION);
+    const { calls, spawnImpl } = createSpawnMock({});
+    const relaunched = await maybeRelaunchWithStagedNativeUpdate(makeDeps(exePath, { spawnImpl }));
+
+    expect(relaunched).toBe(false);
+    expect(calls).toHaveLength(0);
+    await expect(stat(getNativeStagedStateFile(exePath))).resolves.toBeDefined();
+    expect(await readFile(exePath, 'utf-8')).toBe('old-binary');
+  });
+
+  it('kimifix: leaves an automatic stage in place when KIMIFIX_ENABLE_AUTO_UPDATE is unset, even with auto_install on', async () => {
+    vi.stubEnv('KIMIFIX_ENABLE_AUTO_UPDATE', '');
+    await mkdir(homeDir, { recursive: true });
+    await writeFile(join(homeDir, 'tui.toml'), '[upgrade]\nauto_install = true\n', 'utf-8');
     await seedStagedUpdate(exePath, STAGED_VERSION);
     const { calls, spawnImpl } = createSpawnMock({});
     const relaunched = await maybeRelaunchWithStagedNativeUpdate(makeDeps(exePath, { spawnImpl }));

@@ -262,6 +262,9 @@ describe('runUpdatePreflight', () => {
     // Pin the region to cn so address assertions don't follow the dev
     // machine's own login/marker state; global tests override below.
     vi.stubEnv('KIMI_CODE_OAUTH_HOST', 'https://auth.kimi.com');
+    // kimifix fork: auto install is disabled unless KIMIFIX_ENABLE_AUTO_UPDATE
+    // is set, so tests exercising the upstream auto-install machinery opt in here.
+    vi.stubEnv('KIMIFIX_ENABLE_AUTO_UPDATE', '1');
     resetKimiRegionCache();
     mocks.readUpdateInstallState.mockResolvedValue(emptyUpdateInstallState());
     mocks.writeUpdateInstallState.mockResolvedValue(undefined);
@@ -327,6 +330,22 @@ describe('runUpdatePreflight', () => {
 
   it('does not start a fresh-check background install when automatic updates are disabled', async () => {
     disableAutoInstall();
+    mocks.readUpdateCache.mockResolvedValue(emptyUpdateCache());
+    mocks.refreshUpdateCache.mockResolvedValue(cacheWith('0.5.0'));
+    mocks.detectInstallSource.mockResolvedValue('npm-global');
+    const { options } = captureOutput();
+
+    await expect(runUpdatePreflight('0.4.0', options)).resolves.toBe('continue');
+    await flushBackgroundInstall();
+
+    expect(refreshUpdateCache).toHaveBeenCalledTimes(1);
+    expect(detectInstallSource).toHaveBeenCalledTimes(1);
+    expect(promptForInstallChoice).not.toHaveBeenCalled();
+    expect(mocks.spawn).not.toHaveBeenCalled();
+  });
+
+  it('kimifix: never starts a background install without KIMIFIX_ENABLE_AUTO_UPDATE, even when auto_install is on', async () => {
+    vi.stubEnv('KIMIFIX_ENABLE_AUTO_UPDATE', '');
     mocks.readUpdateCache.mockResolvedValue(emptyUpdateCache());
     mocks.refreshUpdateCache.mockResolvedValue(cacheWith('0.5.0'));
     mocks.detectInstallSource.mockResolvedValue('npm-global');

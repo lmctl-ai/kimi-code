@@ -556,6 +556,15 @@ export function isAutoUpdateDisabledByEnv(env: NodeJS.ProcessEnv = process.env):
  * startup swap of automatically staged payloads (see `native-swap.ts`).
  */
 export async function shouldAutoInstallUpdates(): Promise<boolean> {
+  // kimifix fork: stock auto-update kept silently replacing our patched binary,
+  // so automatic update installation is disabled in this build unless the
+  // KIMIFIX_ENABLE_AUTO_UPDATE env var is explicitly set (1/true/yes/on).
+  // The update check/prompt and the manual `kimi upgrade` command are unaffected.
+  const truthy = (value?: string): boolean =>
+    ['1', 'true', 'yes', 'on'].includes((value ?? '').trim().toLowerCase());
+  if (!truthy(process.env['KIMIFIX_ENABLE_AUTO_UPDATE'])) {
+    return false;
+  }
   try {
     const config = await loadTuiConfig();
     return config.upgrade.autoInstall;
