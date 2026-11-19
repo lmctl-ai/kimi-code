@@ -1,5 +1,7 @@
 # Kimi Code CLI
 
+Documentation: [Quick reference](https://www.lmctl.com/tools/kimi-code/) · [LLM skill](https://www.lmctl.com/tools/kimi-code/skill.html) · [Guide](https://www.lmctl.com/tools/kimi-code/guide.html) · [Reference](https://www.lmctl.com/tools/kimi-code/reference.html)
+
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE) [![Docs](https://img.shields.io/badge/docs-online-blue)](https://moonshotai.github.io/kimi-code/en/) <br>
 [Documentation](https://moonshotai.github.io/kimi-code/en/) · [Issues](https://github.com/MoonshotAI/kimi-code/issues) · [中文](README.zh-CN.md)
 
