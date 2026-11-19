@@ -13,11 +13,6 @@ on:
         required: false
         type: number
         default: 3
-      version:
-        description: 'Optional release version (x.y.z) embedded into the compiled executable'
-        required: false
-        type: string
-        default: ''
       sign-macos:
         description: 'Whether to sign + notarize macOS builds (requires Apple secrets)'
         required: false
@@ -34,7 +29,7 @@ on:
         type: string
         default: ''
       version:
-        description: 'Override the CLI package version before building; empty keeps package.json'
+        description: 'Release version (x.y.z) set into the CLI package and embedded into the compiled executable; empty keeps package.json'
         required: false
         type: string
         default: ''
