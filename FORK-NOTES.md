@@ -16,7 +16,7 @@ fails with `runtime <id> does not exist in workspace <id>` — restarting the sa
 just replays the stale binding, so the wedge persists until the binding is repaired or an ACP
 host re-registers and rebinds the runtime.
 
-The fork carries one patch on top of upstream (currently based on upstream **2.3.1**):
+The fork carries one patch on top of upstream (currently based on upstream **2.4.1**):
 
 - **fix(agent-core-v2): rebind stale agent runtime to local on first use after restore** —
   `AgentRuntimeService.inspect()`/`acquire()`/`isAvailable()` catch `runtime.not_found`,
@@ -52,7 +52,7 @@ Patched binaries are published as GitHub releases on this fork and install with
 against the release's `SHA256SUMS`):
 
 ```sh
-lmscript install github:lmctl-ai/kimi-code@v2.3.1+kimifix.1
+lmscript install github:lmctl-ai/kimi-code@v2.4.1+kimifix.1
 ```
 
 lmscript verifies the checksum, caches the binary under
@@ -61,18 +61,20 @@ install it over your kimi-code binary (back up the stock one first):
 
 ```sh
 cp ~/.kimi-code/bin/kimi ~/.kimi-code/bin/kimi.stock.bak
-cp ~/.cache/lmscript/tools/github/lmctl-ai/kimi-code/v2.3.1+kimifix.1/kimi-code ~/.kimi-code/bin/kimi
+cp ~/.cache/lmscript/tools/github/lmctl-ai/kimi-code/v2.4.1+kimifix.1/kimi-code ~/.kimi-code/bin/kimi
 ```
 
 ## Operational note: auto-update
 
 kimi-code auto-update silently replaces a patched binary with the stock release, which
 reintroduces the bug fleet-wide (observed 2026-09-20: patched 0.41.0 replaced by stock 2.0.2,
-and again 2026-10-24: patched 2.1.1 replaced by stock 2.3.1).
-If you run a patched build, disable automatic installs:
+2026-10-24: patched 2.1.1 replaced by stock 2.3.1, and 2026-11-01: patched 2.3.1 replaced by
+stock 2.4.1 — the last one despite `[upgrade] auto_install = false`, because the updater
+defaults to installing when the client preferences cannot be read).
 
-```toml
-# ~/.kimi-code/tui.toml
-[upgrade]
-auto_install = false
-```
+Because the config flag proved unreliable, this fork disables the entire startup update
+flow in the build itself: unless the environment variable `KIMIFIX_ENABLE_AUTO_UPDATE`
+is set (`1`/`true`/`yes`/`on`), the new-version check and notice, the background install,
+and the staged-payload swap at launch are all skipped
+(`apps/kimi-code/src/cli/update/preflight.ts`, `isKimifixAutoUpdateEnabled`). The manual
+`kimi upgrade` command still works.
