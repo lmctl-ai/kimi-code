@@ -551,18 +551,27 @@ export function isAutoUpdateDisabledByEnv(env: NodeJS.ProcessEnv = process.env):
 }
 
 /**
+ * kimifix fork: stock auto-update kept silently replacing our patched binary,
+ * so the entire startup update flow (new-version check/notice, background
+ * install, staged swap) is disabled in this build unless
+ * KIMIFIX_ENABLE_AUTO_UPDATE is explicitly set (1/true/yes/on).
+ * The manual `kimi upgrade` command is unaffected.
+ */
+export function isKimifixAutoUpdateEnabled(env: NodeJS.ProcessEnv = process.env): boolean {
+  const truthy = (value?: string): boolean =>
+    ['1', 'true', 'yes', 'on'].includes((value ?? '').trim().toLowerCase());
+  return truthy(env['KIMIFIX_ENABLE_AUTO_UPDATE']);
+}
+
+/**
  * The persisted `[upgrade].auto_install` preference (defaults to true when
  * the config cannot be read). Gates the passive background install — and the
  * startup swap of automatically staged payloads (see `native-swap.ts`).
  */
 export async function shouldAutoInstallUpdates(): Promise<boolean> {
-  // kimifix fork: stock auto-update kept silently replacing our patched binary,
-  // so automatic update installation is disabled in this build unless the
-  // KIMIFIX_ENABLE_AUTO_UPDATE env var is explicitly set (1/true/yes/on).
-  // The update check/prompt and the manual `kimi upgrade` command are unaffected.
-  const truthy = (value?: string): boolean =>
-    ['1', 'true', 'yes', 'on'].includes((value ?? '').trim().toLowerCase());
-  if (!truthy(process.env['KIMIFIX_ENABLE_AUTO_UPDATE'])) {
+  // kimifix fork: automatic update installation is disabled in this build
+  // unless KIMIFIX_ENABLE_AUTO_UPDATE is set — see isKimifixAutoUpdateEnabled.
+  if (!isKimifixAutoUpdateEnabled()) {
     return false;
   }
   try {
@@ -844,7 +853,7 @@ export async function runUpdatePreflight(
   const logger = options.logger ?? log;
   const platform = process.platform;
 
-  if (isAutoUpdateDisabledByEnv()) return 'continue';
+  if (isAutoUpdateDisabledByEnv() || !isKimifixAutoUpdateEnabled()) return 'continue';
 
   try {
     const isInteractive = options.isTTY ?? (process.stdin.isTTY && process.stdout.isTTY);

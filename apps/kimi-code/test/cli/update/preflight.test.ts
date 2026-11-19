@@ -344,19 +344,17 @@ describe('runUpdatePreflight', () => {
     expect(mocks.spawn).not.toHaveBeenCalled();
   });
 
-  it('kimifix: never starts a background install without KIMIFIX_ENABLE_AUTO_UPDATE, even when auto_install is on', async () => {
+  it('kimifix: skips all update work without KIMIFIX_ENABLE_AUTO_UPDATE, even when auto_install is on', async () => {
     vi.stubEnv('KIMIFIX_ENABLE_AUTO_UPDATE', '');
-    mocks.readUpdateCache.mockResolvedValue(emptyUpdateCache());
+    mocks.readUpdateCache.mockResolvedValue(cacheWith('0.5.0'));
     mocks.refreshUpdateCache.mockResolvedValue(cacheWith('0.5.0'));
-    mocks.detectInstallSource.mockResolvedValue('npm-global');
     const { options } = captureOutput();
 
     await expect(runUpdatePreflight('0.4.0', options)).resolves.toBe('continue');
-    await flushBackgroundInstall();
 
-    expect(refreshUpdateCache).toHaveBeenCalledTimes(1);
-    expect(detectInstallSource).toHaveBeenCalledTimes(1);
-    expect(promptForInstallChoice).not.toHaveBeenCalled();
+    expect(readUpdateCache).not.toHaveBeenCalled();
+    expect(refreshUpdateCache).not.toHaveBeenCalled();
+    expect(detectInstallSource).not.toHaveBeenCalled();
     expect(mocks.spawn).not.toHaveBeenCalled();
   });
 
